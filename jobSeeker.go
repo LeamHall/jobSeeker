@@ -8,7 +8,6 @@ package jobSeeker
 
 import (
     "errors"
-    //"fmt"
     "os"
     "strconv"
     "strings"
@@ -16,13 +15,12 @@ import (
 
 
 // DataFromFile takes a fileName string, and returns a slice of strings.
-// TODO:    Remove lines with comment characters like / and #
-//          Do not include empty strings.
 func DataFromFile(f string) (data []string, err error) {
+    comments := []string{"#", "/", "*",}
     handle, err := os.ReadFile(f)
     if err != nil {
         if errors.Is(err, os.ErrNotExist) {
-            return data, nil
+            return data, err
         }
         return data, err
     }
@@ -30,10 +28,19 @@ func DataFromFile(f string) (data []string, err error) {
         return data, err
     }
     lineData := strings.Split(string(handle), "\n")
-    for _, line := range lineData {
-        line = strings.TrimSpace(line)
-        data = append(data, line)
-    }
+    CheckPrefix:
+        for _, line := range lineData {
+            line = strings.TrimSpace(line)
+            if len(line) == 0 {
+                continue
+            }
+            for _,c := range comments {
+                if strings.HasPrefix(line, c) {
+                    continue CheckPrefix
+                }
+            } 
+            data = append(data, line)
+        }
     return data, err
 }
 
@@ -48,6 +55,12 @@ func FieldsFromLine(line string, sep string) (data []string, err error) {
     return data, err
 }
 
+// InitFile creates the initial file, and returns an error if it fails.
+//func InitFile(fileName string) (err error) {
+//    os.
+//}
+
+// Job holds attributes of potential jobs.
 type Job struct {
     Id              int
     Title           string
@@ -62,8 +75,6 @@ type Job struct {
 
 // JBuilder takes a []string and assigns data to attributes.
 // Some fields are munged; string to int, 'Y' to boolean true
-// TODO:
-//  If PocId provided, set LastContact to the same as the POC.
 func (j *Job) JBuilder(data []string) {
     j.Id, _             = strconv.Atoi(data[0])
     j.Title             = data[1]
@@ -79,6 +90,7 @@ func (j *Job) JBuilder(data []string) {
 }
 
 
+// POC holds attributes of Points Of Contact.
 type POC struct {
     Id              int
     Name            string
@@ -92,6 +104,37 @@ type POC struct {
 
 // PBuilder takes a []string and assigns data to attributes.
 func (p *POC) PBuilder(data []string) { 
-    p.Id, _         = strconv.Atoi(data[0]) 
+    p.Id, _             = strconv.Atoi(data[0]) 
+    p.Name              = data[1]
+    p.Notes             = data[2]
+    p.Company           = data[3]
+    p.Email             = data[4]
+    p.Phone             = data[5]
+    p.FirstContact, _   = strconv.Atoi(data[6])
+    p.LastContact, _    = strconv.Atoi(data[7])
+}
+
+// HighestId parses the data given splits on the seperator, and returns the 
+//  highest int in the first field. 
+// This assumes the first field elements are all ints.
+func HighestId(data []string, sep string) (id int, err error) {
+    if len(data) < 1 {
+        return id, err
+    }
+   
+    for _, line := range data {
+        d, err := FieldsFromLine(line, sep) 
+        if err != nil {
+            return 0, err
+        }
+        thisId, err := strconv.Atoi(d[0])
+        if err != nil {
+            return 0, err
+        }
+        if thisId > id {
+            id = thisId
+        }
+    }
+    return id, err
 }
  

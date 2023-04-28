@@ -20,7 +20,8 @@ func TestDataFromFile(t *testing.T) {
     }	
     defer os.Remove(tempFile.Name())
 
-    if _, err := tempFile.Write([]byte("  first\n second \n third \n the rest  ")); err != nil {
+    if _, err := tempFile.Write(
+        []byte("\n \n \n # Comment #1 \n // Comment \n */ comment\n first\n second \n third \n the rest  ")); err != nil {
         t.Errorf("Could not write to tempFile: %s", err)
     }
 
@@ -56,7 +57,7 @@ func TestJBuilder(t *testing.T) {
         "23", 
         "Sr Automation Eng", 
         "Y",
-        "Good person", 
+        "Good reviews", 
         "MyCo", 
         "myco.com", 
         "1", 
@@ -71,8 +72,8 @@ func TestJBuilder(t *testing.T) {
     if !j.Active {
         t.Errorf("Expected j.Active to be true")
     }
-    if j.Notes != "Good person" {
-        t.Errorf("Expected %s, got %s", "Good person", j.Notes)
+    if j.Notes != "Good reviews" {
+        t.Errorf("Expected %s, got %s", "Good reviews", j.Notes)
     }
     if j.Company != "MyCo" {
         t.Errorf("Expected %s, got %s", "MyCo", j.Company)
@@ -84,7 +85,60 @@ func TestJBuilder(t *testing.T) {
         t.Errorf("Expected FirstContact of %d, got %d", 20230101, j.FirstContact)
     }
     if j.LastContact != 20230401 {
-        t.Errorf("Expected LastContact of %d, got %d", 20230401, j.LastContact
+        t.Errorf("Expected LastContact of %d, got %d", 20230401, j.LastContact)
     }
 }
+
+func TestPBuilder(t *testing.T) {
+    data := []string{
+        "32",
+        "John Smythe",
+        "Long time recruiter", 
+        "MyCo",
+        "jsmythe@myco.com",
+        "555.1212",
+        "20230101",
+        "20230401",
+        }
+    p   := jobSeeker.POC{}
+    p.PBuilder(data)
+    if p.Id != 32 {
+        t.Errorf("Expected an Id of %d, got %d", 32, p.Id)
+    }
+    if p.Name != "John Smythe" {
+        t.Errorf("Expected Name of %s, got %s", "John Smythe", p.Name)
+    }
+    if p.Notes != "Long time recruiter" {
+        t.Errorf("Expected notes of %s, got %s", "Long time recruiter", p.Notes)
+    }
+    if p.Company != "MyCo" {
+        t.Errorf("Expected company to be %s, got %s", "MyCo", p.Company)
+    }
+    if p.Email != "jsmythe@myco.com" {
+        t.Errorf("Expected email to be %s, got %s", "jsmythe@myco.com", p.Email)
+    }
+    if p.Phone != "555.1212" {
+        t.Errorf("Expected phone to be %s, got %s", "555.1212", p.Phone)
+    }
+    if p.FirstContact != 20230101 {
+        t.Errorf("Expected FirstContact to be %d, got %d", 20230101, p.FirstContact)
+    }
+    if p.LastContact != 20230401 {
+        t.Errorf("Expected LastContact to be %d, got %d", 20230401, p.LastContact)
+    }
+}
+
+func TestHighestId(t *testing.T) {
+    data        := []string{"1;one", "2;two", "3;drei", "4;kvar", "27315; lots",}
+    sep         := ";"
+    expected    := 27315
+    result, err := jobSeeker.HighestId(data, sep)
+    if err != nil {
+        t.Errorf("Could not run HighestId: %s", err)
+    }
+    if result != expected {
+        t.Errorf("Expected HighestId of %d, got %d", expected, result)
+    }
+}
+
 

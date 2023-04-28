@@ -7,7 +7,7 @@
 package jobSeeker
 
 import (
-    "errors"
+    //"errors"
     "os"
     "strconv"
     "strings"
@@ -19,9 +19,9 @@ func DataFromFile(f string) (data []string, err error) {
     comments := []string{"#", "/", "*",}
     handle, err := os.ReadFile(f)
     if err != nil {
-        if errors.Is(err, os.ErrNotExist) {
-            return data, err
-        }
+        //if errors.Is(err, os.ErrNotExist) {
+        //    return data, err
+        //}
         return data, err
     }
     if len(handle) == 0 {

@@ -11,7 +11,6 @@ import (
     "fmt"
     "os" 
 
-    //"reflect"
     "github.com/LeamHall/jobSeeker"
 )
 
@@ -22,7 +21,6 @@ const pocFile = "jobSeeker_pocs.data"
 func main() {
 
     jobData, err    := jobSeeker.DataFromFile(jobFile)
-    //fmt.Println(reflect.TypeOf(err).String(), err)
     if err != nil {
         if errors.Is(err, os.ErrNotExist) {
             _, err := os.Create(jobFile)
@@ -35,6 +33,7 @@ func main() {
             os.Exit(1)
         }
     }
+
     pocData, err    := jobSeeker.DataFromFile(pocFile)
     if err != nil {
         if errors.Is(err, os.ErrNotExist) {

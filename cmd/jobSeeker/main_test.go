@@ -18,8 +18,8 @@ import (
 
 var (
     binName     = "jobSeeker"
-    jobFile     = "jobSeeker_jobs.data"
-    pocFile     = "jobSeeker_pocs.data"
+    jobFile     = "jobSeeker_jobs.test_data"
+    pocFile     = "jobSeeker_pocs.test_data"
 )
 
 func TestMain(m *testing.M) {

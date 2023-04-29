@@ -8,6 +8,7 @@ package main
 
 import (
     "errors"
+    "flag"
     "fmt"
     "os" 
 
@@ -19,7 +20,17 @@ const jobFile = "jobSeeker_jobs.data"
 const pocFile = "jobSeeker_pocs.data"
 
 func main() {
+    flag.Usage = func() {
+        fmt.Fprintf(flag.CommandLine.Output(), "%s tool.\n", os.Args[0])
+        fmt.Fprintf(flag.CommandLine.Output(), "Job add format\n\t\"job;title;active(y/n);notes;company;url;pocId;firstContact;lastContact\"\n")
+        fmt.Fprintf(flag.CommandLine.Output(), "POC add format\n\t\"poc;name;notes;company;email;phone;firstContact;lastContact\"\n\n")
+        fmt.Fprintln(flag.CommandLine.Output(), "Usage:")
+        flag.PrintDefaults()
+    }
 
+    add := flag.String("add", "", "Double quoted line to add")
+    flag.Parse()
+    
     jobData, err    := jobSeeker.DataFromFile(jobFile)
     if err != nil {
         if errors.Is(err, os.ErrNotExist) {
@@ -48,16 +59,68 @@ func main() {
         }
     }
 
-    if len(jobData) > 0 {
-        for _, line := range jobData {
-            fmt.Println(line)
+    switch {
+    case len(*add) > 0:
+        newData := make([]string, 10)
+        addData, err := jobSeeker.FieldsFromLine(*add, ";")
+        if err != nil {
+            fmt.Printf("Can't convert %s to good data: %s\n", *add, err)
+        } 
+        count := copy(newData, addData)
+        if count < len(addData) {
+            fmt.Printf("Not sure why the copy failed. Just did %d", count)
         }
-    }
-    if len(pocData) > 0 {
-        for _, line := range pocData {
-            fmt.Println(line)
+        if jobSeeker.InputType(*add) == "job" {
+            j   := jobSeeker.Job{}
+            j.JBuilder(newData)
+            jobData, err = jobSeeker.Add(j.String, ";", jobData)
+            if err != nil {
+                fmt.Printf("Could not add %s to jobs\n", newData)
+                os.Exit(1)
+            }
+            err = jobSeeker.WriteFile(jobFile, jobData)
+            if err != nil {
+                fmt.Printf("Could not write to job file: %s\n", err)
+            } 
+            if len(jobData) > 0 {
+                for _, line := range jobData {
+                    fmt.Println(line)
+                }
+            }
+        } else if jobSeeker.InputType(*add) == "poc" {
+            p   := jobSeeker.POC{}
+            p.PBuilder(newData)
+            pocData, err = jobSeeker.Add(p.String, ";", pocData)
+            if err != nil {
+                fmt.Printf("Could not add %s to pocs\n", *add)
+                os.Exit(1)
+            }
+            err = jobSeeker.WriteFile(pocFile, pocData)
+            if err != nil {
+                fmt.Printf("Could not write to poc file: %s\n", err)
+            } 
+            if len(pocData) > 0 {
+                for _, line := range pocData {
+                    fmt.Println(line)
+                }
+            }
         }
-    }
+    default:
+        fmt.Println("Not sure what to do here.")
+        os.Exit(1)
+    
+    } 
+    
+    //if len(jobData) > 0 {
+    //    for _, line := range jobData {
+    //        fmt.Println(line)
+    //    }
+    //}
+    //if len(pocData) > 0 {
+    //    for _, line := range pocData {
+    //        fmt.Println(line)
+    //    }
+    //}
 }
 
 

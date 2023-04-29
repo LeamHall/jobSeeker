@@ -1,8 +1,8 @@
 *.swp
-wcc
 bin/
 cmd/jobSeeker/jobSeeker_jobs.data
 cmd/jobSeeker/jobSeeker_pocs.data
+cmd/jobSeeker/jobSeeker
 
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore

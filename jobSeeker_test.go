@@ -8,8 +8,9 @@ package jobSeeker_test
 
 import (
     "os" 
+    "strings"
     "testing"
-    
+
     "github.com/LeamHall/jobSeeker"
 )
 
@@ -87,6 +88,9 @@ func TestJBuilder(t *testing.T) {
     if j.LastContact != 20230401 {
         t.Errorf("Expected LastContact of %d, got %d", 20230401, j.LastContact)
     }
+    if j.String != strings.Join(data, ";") {
+        t.Errorf("Expected a string of %s, got %s", strings.Join(data, ";"), j.String)
+    }
 }
 
 func TestPBuilder(t *testing.T) {
@@ -126,6 +130,9 @@ func TestPBuilder(t *testing.T) {
     if p.LastContact != 20230401 {
         t.Errorf("Expected LastContact to be %d, got %d", 20230401, p.LastContact)
     }
+    if p.String != strings.Join(data, ";") {
+        t.Errorf("Expected a string of %s, got %s", strings.Join(data, ";"), p.String)
+    }
 }
 
 func TestHighestId(t *testing.T) {
@@ -141,4 +148,60 @@ func TestHighestId(t *testing.T) {
     }
 }
 
+func TestInputType(t *testing.T) {
+    typeJ       := jobSeeker.InputType("job;this;that;the other thing")
+    typeP       := jobSeeker.InputType("poc;something;allthing; nothing")
+    typeN       := jobSeeker.InputType("fred;joe;sam")
+    if typeJ != "job" {
+        t.Errorf("Expected a %s, got %s", "job", typeJ)
+    }
+    if typeP != "poc" {
+        t.Errorf("Expected a %s, got %s", "poc", typeP)
+    }
+    if typeN != "" {
+        t.Errorf("Expected an empty string, got %s", typeN)
+    }
+}
+
+func TestAdd(t *testing.T) {
+    baseData, err   := jobSeeker.Add("job;some;where;over",";", []string{})
+    if err != nil {
+        t.Errorf("Expected Add to not error out: %s", err)
+    }
+    if len(baseData) != 1 {
+        t.Errorf("Expected baseData to have %d elements, but it has %d", 1, len(baseData))
+    }
+    if !strings.HasPrefix(baseData[0], "1;") {
+        t.Errorf("Expected the first line to start with '1;', got %s", baseData[0])
+    }
+}
+
+func TestToday(t *testing.T) {
+    today   := jobSeeker.Today()
+    if today < 19000000 {
+        t.Errorf("Expected a date more recent than %d", today)
+    }
+    if today > 21000000 {
+        t.Errorf("Not ready for stardates yet: %d", today)
+    }
+}
+
+func TestWriteFile(t *testing.T) {
+    tempFile, err := os.CreateTemp("", "datafile_writeable")
+    if err != nil {
+        t.Errorf("Could not create tempFile: %s", err)
+    }	
+    data := []string{ "one", "two", "three"}
+    err = jobSeeker.WriteFile(tempFile.Name(), data)
+    if err != nil {
+        t.Errorf("Could not write to %s: %s", tempFile.Name(), err)
+    }
+    newData, err := jobSeeker.DataFromFile(tempFile.Name())
+    if err != nil {
+        t.Errorf("Could not read %s: %s", tempFile.Name(), err)
+    }
+    if len(newData) != 3 {
+        t.Errorf("Expected %d elements in newData, got %d", 3, len(newData))
+    }
+}
 

@@ -17,8 +17,8 @@ import (
 )
 
 
-const jobFile = "jobSeeker_jobs.data"
-const pocFile = "jobSeeker_pocs.data"
+const jobFile = "data/jobSeeker_jobs.data"
+const pocFile = "data/jobSeeker_pocs.data"
 
 func main() {
     flag.Usage = func() {

@@ -132,6 +132,14 @@ func main() {
                 }
             }
         }
+    case *jobs:
+        for _, line := range jobData {
+            fmt.Println(line)
+        }
+    case *pocs:
+        for _, line := range pocData {
+            fmt.Println(line)
+        }
     default:
         fmt.Println("Not sure what to do here.")
         os.Exit(1)

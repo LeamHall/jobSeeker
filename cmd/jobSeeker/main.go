@@ -11,6 +11,7 @@ import (
     "flag"
     "fmt"
     "os" 
+    "strings"
 
     "github.com/LeamHall/jobSeeker"
 )
@@ -29,6 +30,10 @@ func main() {
     }
 
     add := flag.String("add", "", "Double quoted line to add")
+    jobs    := flag.Bool("jobs", false, "Look at jobs")
+    pocs    := flag.Bool("pocs", false, "Look at POCs")
+    search  := flag.String("search", "", "String to search for")
+
     flag.Parse()
     
     jobData, err    := jobSeeker.DataFromFile(jobFile)
@@ -60,6 +65,28 @@ func main() {
     }
 
     switch {
+    case len(*search) > 0:
+        if !*jobs && !*pocs {
+            fmt.Println("Please specify --jobs and/or --pocs to search through")
+            os.Exit(1)
+        }
+        if *jobs {
+            jobData := jobSeeker.Search(jobData, strings.ToLower(*search))
+            if len(jobData) > 0 {
+                for _, j := range jobData {
+                    fmt.Println(j)
+                }
+            }
+        }
+        if *pocs {
+            pocData := jobSeeker.Search(pocData, strings.ToLower(*search))
+            if len(pocData) > 0 {
+                for _, p := range pocData {
+                    fmt.Println(p)
+                }
+            }
+        }
+ 
     case len(*add) > 0:
         newData := make([]string, 10)
         addData, err := jobSeeker.FieldsFromLine(*add, ";")

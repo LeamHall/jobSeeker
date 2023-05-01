@@ -205,4 +205,14 @@ func WriteFile(fileName string, data []string) error {
     return err
 }
 
-
+// Search takes a data []string and a search string, and returns a []string
+// of data lines that contain the search string. The search is case-insensitive.
+func Search (data []string, search string) (result []string) {
+    search = strings.ToLower(search)
+    for _, line := range data {
+        if strings.Contains(strings.ToLower(line), search) {
+            result = append(result, line)
+        }
+    }
+    return
+}

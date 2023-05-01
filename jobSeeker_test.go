@@ -205,3 +205,13 @@ func TestWriteFile(t *testing.T) {
     }
 }
 
+func TestSearch(t *testing.T) {
+    data := []string{"ONE", "eine", "two", "three"}
+    searchData := jobSeeker.Search(data, "n")
+    if len(searchData) != 2 {
+        t.Errorf("Expected %d search results for 'n', got %d", 2, len(searchData))
+    }
+    if searchData[0] != "ONE" {
+        t.Errorf("Expected %s to be searchData[0], got %s", "One", searchData[0])
+    }
+}
